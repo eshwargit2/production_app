@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Force Start Tool</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #1a1a1a; 
+            color: white; 
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: #2a2a2a; 
+            padding: 30px; 
+            border-radius: 12px; 
+        }
+        .btn { 
+            background: linear-gradient(45deg, #ff6b35, #f7931e); 
+            color: white; 
+            border: none; 
+            padding: 15px 25px; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin: 10px 5px; 
+            font-size: 16px;
+        }
+        .btn:hover { opacity: 0.9; }
+        .input { 
+            padding: 10px; 
+            border-radius: 5px; 
+            border: 1px solid #555; 
+            background: #333; 
+            color: white; 
+            width: 200px; 
+        }
+        .status { 
+            background: #333; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 20px 0; 
+            font-family: monospace; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Live Quiz Force Start Tool</h1>
+        <p>Use this when participants are connected but admin shows Participants (0)</p>
+        
+        <div class="status" id="status">
+            Status: Ready to connect...
+        </div>
+        
+        <div>
+            <label>Session ID:</label><br>
+            <input type="text" class="input" id="sessionId" placeholder="session_1759472851443">
+            <br><br>
+            
+            <button class="btn" onclick="connectSocket()">🔌 Connect to Socket.io</button>
+            <button class="btn" onclick="forceStartQuiz()" id="startBtn" disabled>⚡ Force Start Quiz</button>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <h3>📋 Instructions:</h3>
+            <ol>
+                <li>Get the session ID from your admin page (e.g., session_1759472851443)</li>
+                <li>Enter it above and click "Connect to Socket.io"</li>
+                <li>Wait for participants to join (they'll see "Get Ready!")</li>
+                <li>Click "Force Start Quiz" to begin regardless of participant count</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = 'Status: ' + message;
+            console.log(message);
+        }
+        
+        function connectSocket() {
+            updateStatus('Connecting to Socket.io...');
+            socket = io();
+            
+            socket.on('connect', () => {
+                updateStatus('✅ Connected! Socket ID: ' + socket.id);
+                document.getElementById('startBtn').disabled = false;
+            });
+            
+            socket.on('disconnect', () => {
+                updateStatus('❌ Disconnected');
+                document.getElementById('startBtn').disabled = true;
+            });
+            
+            socket.on('quiz-started', (data) => {
+                updateStatus('🎉 Quiz started successfully! Data: ' + JSON.stringify(data));
+            });
+        }
+        
+        function forceStartQuiz() {
+            const sessionId = document.getElementById('sessionId').value.trim();
+            
+            if (!sessionId) {
+                alert('Please enter a session ID');
+                return;
+            }
+            
+            if (!socket || !socket.connected) {
+                alert('Please connect to Socket.io first');
+                return;
+            }
+            
+            const confirmed = confirm('⚡ Force start quiz for session: ' + sessionId + '?');
+            
+            if (confirmed) {
+                updateStatus('🚀 Sending start-quiz event...');
+                socket.emit('start-quiz', { sessionId });
+                
+                // Also redirect to controller
+                setTimeout(() => {
+                    const controllerUrl = '/admin/live-controller/' + sessionId;
+                    updateStatus('🎮 Redirecting to: ' + controllerUrl);
+                    window.open(controllerUrl, '_blank');
+                }, 1000);
+            }
+        }
+        
+        // Auto-extract session ID if on admin page
+        window.onload = function() {
+            const url = window.location.href;
+            if (url.includes('admin/live')) {
+                // Try to find session ID in the page
+                setTimeout(() => {
+                    const pageText = document.body.innerText;
+                    const sessionMatch = pageText.match(/session_\d+/);
+                    if (sessionMatch) {
+                        document.getElementById('sessionId').value = sessionMatch[0];
+                        updateStatus('📋 Auto-detected session: ' + sessionMatch[0]);
+                    }
+                }, 2000);
+            }
+        };
+    </script>
+</body>
+</html>
