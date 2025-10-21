@@ -70,8 +70,13 @@ export async function POST(req: Request) {
     }, { status: 409 })
   }
 
-  const quiz = await Quiz.findById(quizId).lean()
+  const quiz = await Quiz.findById(quizId).lean() as any
   if (!quiz) return NextResponse.json({ error: "Quiz not found" }, { status: 404 })
+
+  // Type guard to ensure quiz has questionIds property
+  if (!quiz.questionIds || !Array.isArray(quiz.questionIds)) {
+    return NextResponse.json({ error: "Quiz has no questions" }, { status: 400 })
+  }
 
   const qDocs = await Question.find({ _id: { $in: quiz.questionIds } }).lean()
   const correctMap = new Map(qDocs.map((q: any) => [String(q._id), q.correctOptionIndex as number]))

@@ -49,7 +49,19 @@ const ANSWER_COLORS = [
 
 export default function AdminLiveController() {
   const params = useParams()
-  const sessionId = params.sessionId as string
+  const sessionId = params?.sessionId as string
+  
+  // Return early if sessionId is not available
+  if (!sessionId) {
+    return (
+      <div className="min-h-screen gradient-bg flex items-center justify-center">
+        <div className="glass-effect rounded-xl p-8 border-2 border-white/20">
+          <h1 className="text-2xl font-bold text-white mb-4">Session Not Found</h1>
+          <p className="text-white/80">Invalid session ID provided.</p>
+        </div>
+      </div>
+    )
+  }
   
   const [socket, setSocket] = useState<Socket | null>(null)
   const [gameState, setGameState] = useState<GameState>({

@@ -8,8 +8,14 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
+interface UserData {
+  user?: {
+    isAdmin?: boolean;
+  };
+}
+
 export default function AdminImportPage() {
-  const { data: me } = useSWR("/api/auth/me", fetcher) as { data: any }
+  const { data: me } = useSWR("/api/auth/me", fetcher) as { data: UserData | undefined }
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<any[] | null>(null)
   const [result, setResult] = useState<any | null>(null)

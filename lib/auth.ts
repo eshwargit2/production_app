@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken"
+import jwt, { SignOptions } from "jsonwebtoken"
 import { cookies, headers } from "next/headers"
 import type { NextRequest } from "next/server"
 
@@ -8,10 +8,10 @@ function getJwtSecret() {
 
 export type JwtPayload = { sub: string; email: string; name: string; isAdmin: boolean }
 
-export function signJwt(payload: JwtPayload, expiresIn = "7d") {
+export function signJwt(payload: JwtPayload, expiresIn: string | number = "7d") {
   const secret = getJwtSecret()
   if (!secret) throw new Error("JWT_SECRET is not set. Add it in Project Settings > Environment Variables.")
-  return jwt.sign(payload, secret, { expiresIn })
+  return jwt.sign(payload, secret, { expiresIn } as SignOptions)
 }
 
 export function verifyJwt(token?: string): JwtPayload | null {

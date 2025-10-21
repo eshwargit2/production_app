@@ -21,7 +21,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         status: 'waiting' as const,
         currentQuestion: -1,
         participants: [],
-        createdAt: new Date()
+        createdAt: new Date(),
+        answers: new Map()
       }
       
       liveSessions.set(sessionId, session)

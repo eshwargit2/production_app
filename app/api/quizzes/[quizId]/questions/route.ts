@@ -5,7 +5,7 @@ import Question from "@/models/question"
 
 export async function GET(_: Request, { params }: { params: { quizId: string } }) {
   await dbConnect()
-  const quiz = await Quiz.findById(params.quizId).lean()
+  const quiz = await Quiz.findById(params.quizId).lean() as any
   if (!quiz) return NextResponse.json({ error: "Quiz not found" }, { status: 404 })
   const questions = await Question.find({ _id: { $in: quiz.questionIds } })
     .select("text options correctOptionIndex")

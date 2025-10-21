@@ -12,7 +12,7 @@ import type { UserResponse } from "@/types"
 
 export default function ProfilePage() {
   const { data: me } = useSWR<UserResponse>("/api/auth/me", fetcher)
-  const { data: stats } = useSWR("/api/auth/statistics", fetcher)
+  const { data: stats } = useSWR("/api/auth/statistics", fetcher) as { data: any }
   const [selectedAvatar, setSelectedAvatar] = useState<number>(1)
   const [isUpdating, setIsUpdating] = useState(false)
   const [message, setMessage] = useState("")
