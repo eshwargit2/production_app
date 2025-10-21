@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
 export default function AdminImportPage() {
-  const { data: me } = useSWR("/api/auth/me", fetcher)
+  const { data: me } = useSWR("/api/auth/me", fetcher) as { data: any }
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<any[] | null>(null)
   const [result, setResult] = useState<any | null>(null)
@@ -38,7 +38,7 @@ export default function AdminImportPage() {
     setLoading(false)
   }
 
-  if (!me?.user?.isAdmin) {
+  if (!me || !me.user || !me.user.isAdmin) {
     return (
       <div className="min-h-screen gradient-bg flex items-center justify-center">
         <div className="glass-effect rounded-xl p-8 border-2 border-white/20">
